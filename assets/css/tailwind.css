@@ -1,0 +1,90 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-slate-50 text-slate-900 antialiased;
+    font-family: 'Manrope', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: 'Playfair Display', Georgia, Cambria, 'Times New Roman', serif;
+  }
+
+  html.dark body {
+    background: radial-gradient(circle at top right, rgb(15 23 42 / 0.75), rgb(2 6 23) 55%) fixed;
+    color: rgb(226 232 240);
+  }
+
+  html.dark .bg-white {
+    background-color: rgb(15 23 42) !important;
+  }
+
+  html.dark .bg-slate-50 {
+    background-color: rgb(10 18 32) !important;
+  }
+
+  html.dark .bg-slate-100 {
+    background-color: rgb(19 31 52) !important;
+  }
+
+  html.dark .bg-slate-900 {
+    background-color: rgb(8 17 35) !important;
+  }
+
+  html.dark .text-slate-900 {
+    color: rgb(241 245 249) !important;
+  }
+
+  html.dark .text-slate-800 {
+    color: rgb(226 232 240) !important;
+  }
+
+  html.dark .text-slate-700 {
+    color: rgb(203 213 225) !important;
+  }
+
+  html.dark .text-slate-600,
+  html.dark .text-slate-500 {
+    color: rgb(148 163 184) !important;
+  }
+
+  html.dark .border-slate-300,
+  html.dark .border-slate-200,
+  html.dark .border-slate-100 {
+    border-color: rgb(51 65 85) !important;
+  }
+
+  html.dark input,
+  html.dark select,
+  html.dark textarea {
+    background-color: rgb(10 18 32) !important;
+    color: rgb(226 232 240) !important;
+    border-color: rgb(51 65 85) !important;
+  }
+
+  html.dark .shadow-soft {
+    box-shadow: 0 16px 36px rgb(2 6 23 / 0.45) !important;
+  }
+}
+
+@layer utilities {
+  .font-serif {
+    font-family: 'Playfair Display', Georgia, Cambria, 'Times New Roman', serif;
+  }
+
+  body:has([data-admin-layout='true']) header,
+  body:has([data-admin-layout='true']) footer {
+    display: none;
+  }
+}
