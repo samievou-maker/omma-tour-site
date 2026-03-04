@@ -40,7 +40,39 @@
         </div>
       </div>
 
-      <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
+      <section class="rounded-2xl border border-slate-200 bg-white p-4 shadow-soft">
+        <div class="flex flex-wrap gap-2">
+          <button
+            v-for="item in sectionNav"
+            :key="item.id"
+            class="rounded-lg border px-3 py-2 text-xs font-bold transition"
+            :class="activeSection === item.id ? 'border-brand bg-brand text-white' : 'border-slate-300 text-slate-700 hover:border-brand hover:text-brand'"
+            @click="setActiveSection(item.id)"
+          >
+            {{ item.label }}
+          </button>
+        </div>
+        <div class="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <article class="rounded-xl border border-slate-200 bg-slate-50 p-3">
+            <p class="text-xs font-bold uppercase tracking-[0.1em] text-slate-500">Туры</p>
+            <p class="mt-1 text-2xl font-extrabold text-slate-900">{{ tours.length }}</p>
+          </article>
+          <article class="rounded-xl border border-slate-200 bg-slate-50 p-3">
+            <p class="text-xs font-bold uppercase tracking-[0.1em] text-slate-500">Новости</p>
+            <p class="mt-1 text-2xl font-extrabold text-slate-900">{{ news.length }}</p>
+          </article>
+          <article class="rounded-xl border border-slate-200 bg-slate-50 p-3">
+            <p class="text-xs font-bold uppercase tracking-[0.1em] text-slate-500">Пользователи</p>
+            <p class="mt-1 text-2xl font-extrabold text-slate-900">{{ adminUsers.length }}</p>
+          </article>
+          <article class="rounded-xl border border-slate-200 bg-slate-50 p-3">
+            <p class="text-xs font-bold uppercase tracking-[0.1em] text-slate-500">Брони</p>
+            <p class="mt-1 text-2xl font-extrabold text-slate-900">{{ adminBookings.length }}</p>
+          </article>
+        </div>
+      </section>
+
+      <section v-show="isSectionVisible('site-settings')" id="site-settings" class="rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
         <h2 class="text-2xl font-bold text-slate-900">Настройки сайта</h2>
         <div class="mt-4 grid gap-3 md:grid-cols-2">
           <label class="text-sm font-semibold text-slate-700">Лого (основное)
@@ -76,7 +108,7 @@
         </div>
       </section>
 
-      <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
+      <section v-show="isSectionVisible('footer-settings')" id="footer-settings" class="rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
         <h2 class="text-2xl font-bold text-slate-900">Footer (низ сайта)</h2>
         <p class="mt-1 text-sm text-slate-600">Эта секция отображается внизу сайта и полностью редактируется отсюда.</p>
 
@@ -124,7 +156,7 @@
       </section>
 
       <div class="grid gap-5">
-        <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
+        <section v-show="isSectionVisible('destinations')" id="destinations" class="rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
           <div class="mb-3 flex items-center justify-between">
             <h2 class="text-2xl font-bold text-slate-900">Направления</h2>
             <button class="rounded-xl bg-brand-dark px-3 py-2 text-xs font-bold text-white" @click="createDestination">+ Направление</button>
@@ -144,7 +176,7 @@
           </div>
         </section>
 
-        <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
+        <section v-show="isSectionVisible('reviews')" id="reviews" class="rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
           <div class="mb-3 flex items-center justify-between">
             <h2 class="text-2xl font-bold text-slate-900">Отзывы</h2>
             <button class="rounded-xl bg-brand-dark px-3 py-2 text-xs font-bold text-white" @click="createReview">+ Отзыв</button>
@@ -160,7 +192,7 @@
         </section>
       </div>
 
-      <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
+      <section v-show="isSectionVisible('why-us')" id="why-us" class="rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
         <div class="mb-3 flex items-center justify-between">
           <h2 class="text-2xl font-bold text-slate-900">Почему мы (Главная)</h2>
           <button class="rounded-xl bg-brand-dark px-3 py-2 text-xs font-bold text-white" @click="createWhyUs">+ Пункт</button>
@@ -176,15 +208,22 @@
         </div>
       </section>
 
-      <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
+      <section v-show="isSectionVisible('tours')" id="tours" class="rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
         <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
           <h2 class="text-2xl font-bold text-slate-900">Туры и цены</h2>
-          <button class="rounded-xl bg-brand-dark px-3 py-2 text-xs font-bold text-white" @click="createNewTour">+ Новый тур</button>
+          <div class="flex flex-wrap gap-2">
+            <button class="rounded-xl border border-slate-300 px-3 py-2 text-xs font-bold text-slate-700" @click="duplicateSelectedTour">Дублировать тур</button>
+            <button class="rounded-xl bg-brand-dark px-3 py-2 text-xs font-bold text-white" @click="createNewTour">+ Новый тур</button>
+          </div>
         </div>
+        <label class="mb-4 block text-sm font-semibold text-slate-700">
+          Поиск тура (название / id)
+          <input v-model="tourSearchQuery" class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" placeholder="Например: dubai или city">
+        </label>
 
         <div class="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
           <button
-            v-for="tour in tours"
+            v-for="tour in filteredTours"
             :key="tour.id"
             class="rounded-xl border px-3 py-2 text-left text-sm"
             :class="tour.id === selectedTourId ? 'border-brand bg-orange-50' : 'border-slate-200 bg-slate-50'"
@@ -294,7 +333,7 @@
         </form>
       </section>
 
-      <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
+      <section v-show="isSectionVisible('news')" id="news" class="rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
         <div class="mb-4 flex items-center justify-between">
           <h2 class="text-2xl font-bold text-slate-900">Новости</h2>
           <button class="rounded-xl bg-brand-dark px-3 py-2 text-xs font-bold text-white" @click="createNewsItem">+ Новость</button>
@@ -312,11 +351,15 @@
         </div>
       </section>
 
-      <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
+      <section v-show="isSectionVisible('users')" id="users" class="rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
         <div class="mb-4 flex items-center justify-between">
           <h2 class="text-2xl font-bold text-slate-900">Управление пользователями</h2>
           <button class="rounded-xl border border-slate-300 px-3 py-2 text-xs font-bold text-slate-700" @click="loadAdminUsers">Обновить список</button>
         </div>
+        <label class="mb-4 block text-sm font-semibold text-slate-700">
+          Поиск пользователя (имя / email / телефон)
+          <input v-model="userSearchQuery" class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" placeholder="Введите текст для фильтра">
+        </label>
         <div class="overflow-x-auto rounded-xl border border-slate-200">
           <table class="min-w-full text-sm">
             <thead class="bg-slate-100 text-left text-slate-600">
@@ -330,7 +373,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="user in adminUsers" :key="user.id" class="border-t border-slate-100">
+              <tr v-for="user in filteredUsers" :key="user.id" class="border-t border-slate-100">
                 <td class="px-3 py-2"><input v-model="user.name" class="w-44 rounded-lg border border-slate-300 px-2 py-1 text-sm"></td>
                 <td class="px-3 py-2"><input v-model="user.email" class="w-56 rounded-lg border border-slate-300 px-2 py-1 text-sm"></td>
                 <td class="px-3 py-2"><input v-model="user.phone" class="w-40 rounded-lg border border-slate-300 px-2 py-1 text-sm"></td>
@@ -343,7 +386,7 @@
                   </div>
                 </td>
               </tr>
-              <tr v-if="adminUsers.length === 0">
+              <tr v-if="filteredUsers.length === 0">
                 <td colspan="6" class="px-3 py-6 text-center text-sm text-slate-500">Пользователи пока не зарегистрированы.</td>
               </tr>
             </tbody>
@@ -351,10 +394,34 @@
         </div>
       </section>
 
-      <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
+      <section v-show="isSectionVisible('bookings')" id="bookings" class="rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
         <div class="mb-4 flex items-center justify-between">
           <h2 class="text-2xl font-bold text-slate-900">Бронирования и оплаты</h2>
           <button class="rounded-xl border border-slate-300 px-3 py-2 text-xs font-bold text-slate-700" @click="loadAdminBookings">Обновить список</button>
+        </div>
+        <div class="mb-4 grid gap-3 md:grid-cols-3">
+          <label class="text-sm font-semibold text-slate-700">
+            Поиск (тур / клиент / email)
+            <input v-model="bookingSearchQuery" class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" placeholder="Введите текст">
+          </label>
+          <label class="text-sm font-semibold text-slate-700">
+            Статус заявки
+            <select v-model="bookingStatusFilter" class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm">
+              <option value="">Все</option>
+              <option value="Новый">Новый</option>
+              <option value="В обработке">В обработке</option>
+              <option value="Завершен">Завершен</option>
+            </select>
+          </label>
+          <label class="text-sm font-semibold text-slate-700">
+            Статус оплаты
+            <select v-model="bookingPaymentFilter" class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm">
+              <option value="">Все</option>
+              <option value="Не оплачено">Не оплачено</option>
+              <option value="Оплачено">Оплачено</option>
+              <option value="Возврат">Возврат</option>
+            </select>
+          </label>
         </div>
         <div class="overflow-x-auto rounded-xl border border-slate-200">
           <table class="min-w-full text-sm">
@@ -368,7 +435,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="booking in adminBookings" :key="booking.id" class="border-t border-slate-100 align-top">
+              <tr v-for="booking in filteredBookings" :key="booking.id" class="border-t border-slate-100 align-top">
                 <td class="px-3 py-2">
                   <p class="text-xs text-slate-500">{{ booking.id }}</p>
                   <p class="font-semibold text-slate-900">{{ booking.tourTitle }}</p>
@@ -399,7 +466,7 @@
                   </div>
                 </td>
               </tr>
-              <tr v-if="adminBookings.length === 0">
+              <tr v-if="filteredBookings.length === 0">
                 <td colspan="5" class="px-3 py-6 text-center text-sm text-slate-500">Бронирований пока нет.</td>
               </tr>
             </tbody>
@@ -458,6 +525,31 @@ const password = ref('')
 const errorMessage = ref('')
 const statusMessage = ref('')
 const statusOk = ref(true)
+type AdminSectionId =
+  | 'all'
+  | 'site-settings'
+  | 'footer-settings'
+  | 'destinations'
+  | 'reviews'
+  | 'why-us'
+  | 'tours'
+  | 'news'
+  | 'users'
+  | 'bookings'
+
+const activeSection = ref<AdminSectionId>('all')
+const sectionNav: Array<{ id: AdminSectionId; label: string }> = [
+  { id: 'all', label: 'Все разделы' },
+  { id: 'site-settings', label: 'Настройки' },
+  { id: 'footer-settings', label: 'Footer' },
+  { id: 'destinations', label: 'Направления' },
+  { id: 'reviews', label: 'Отзывы' },
+  { id: 'why-us', label: 'Почему мы' },
+  { id: 'tours', label: 'Туры' },
+  { id: 'news', label: 'Новости' },
+  { id: 'users', label: 'Пользователи' },
+  { id: 'bookings', label: 'Брони' }
+]
 
 const settings = reactive<SiteSettings>({
   brandMain: 'OMMA',
@@ -511,6 +603,11 @@ const infoLinksText = ref('')
 const mediaLinksText = ref('')
 const partnersLinksText = ref('')
 const socialsText = ref('')
+const tourSearchQuery = ref('')
+const userSearchQuery = ref('')
+const bookingSearchQuery = ref('')
+const bookingStatusFilter = ref('')
+const bookingPaymentFilter = ref('')
 
 const parseLines = (value: string): string[] =>
   value
@@ -551,6 +648,41 @@ const formatDateTime = (raw: string): string => {
 }
 
 const updatedAtLabel = computed(() => formatDateTime(updatedAt.value))
+const filteredTours = computed<TourPackage[]>(() => {
+  const q = tourSearchQuery.value.trim().toLowerCase()
+  if (!q) return tours.value
+  return tours.value.filter((tour) => `${tour.id} ${tour.title} ${tour.country} ${tour.city}`.toLowerCase().includes(q))
+})
+const filteredUsers = computed<AdminUserItem[]>(() => {
+  const q = userSearchQuery.value.trim().toLowerCase()
+  if (!q) return adminUsers.value
+  return adminUsers.value.filter((user) => `${user.name} ${user.email} ${user.phone}`.toLowerCase().includes(q))
+})
+const filteredBookings = computed<AdminBookingItem[]>(() => {
+  const q = bookingSearchQuery.value.trim().toLowerCase()
+  return adminBookings.value.filter((booking) => {
+    if (bookingStatusFilter.value && booking.status !== bookingStatusFilter.value) {
+      return false
+    }
+    if (bookingPaymentFilter.value && booking.paymentStatus !== bookingPaymentFilter.value) {
+      return false
+    }
+    if (!q) {
+      return true
+    }
+    return `${booking.id} ${booking.tourTitle} ${booking.customerName} ${booking.customerEmail} ${booking.customerPhone}`.toLowerCase().includes(q)
+  })
+})
+
+const isSectionVisible = (id: Exclude<AdminSectionId, 'all'>): boolean => activeSection.value === 'all' || activeSection.value === id
+const setActiveSection = (id: AdminSectionId): void => {
+  activeSection.value = id
+  if (import.meta.client && id !== 'all') {
+    requestAnimationFrame(() => {
+      document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    })
+  }
+}
 
 function clonePlain<T>(value: T): T {
   return JSON.parse(JSON.stringify(value)) as T
@@ -609,6 +741,17 @@ const createNewTour = (): void => {
   const tour = makeEmptyTour()
   tours.value.unshift(tour)
   selectTour(tour.id)
+}
+
+const duplicateSelectedTour = (): void => {
+  if (!tourForm.value) {
+    return
+  }
+  const cloned = clonePlain(tourForm.value)
+  cloned.id = `${cloned.id}-${Date.now()}`
+  cloned.title = `${cloned.title} (копия)`
+  tours.value.unshift(cloned)
+  selectTour(cloned.id)
 }
 
 const createNewsItem = (): void => {
