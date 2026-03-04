@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="55%" stop-color="#155e75"/>
+      <stop offset="100%" stop-color="#0891b2"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#sky)"/>
+  <path d="M0 640 C220 560 330 700 540 640 C760 575 880 730 1120 650 C1300 590 1460 640 1600 610 L1600 900 L0 900 Z" fill="#0b2545" opacity="0.75"/>
+  <path d="M0 710 C240 640 420 760 650 700 C850 650 1040 780 1280 700 C1400 660 1510 700 1600 680 L1600 900 L0 900 Z" fill="#1e3a8a" opacity="0.6"/>
+  <text x="100" y="160" fill="#e2e8f0" font-size="84" font-family="Georgia, 'Times New Roman', serif">OMMA TOUR</text>
+  <text x="100" y="240" fill="#bae6fd" font-size="36" font-family="Arial, sans-serif">Premium travel experiences</text>
+</svg>

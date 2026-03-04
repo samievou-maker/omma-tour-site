@@ -9,40 +9,33 @@
       class="border-t border-slate-200 bg-gradient-to-b from-slate-50 to-slate-100 dark:border-slate-800 dark:from-slate-900 dark:to-slate-950"
     >
       <div class="mx-auto w-[min(1200px,92%)] py-12">
-        <div class="grid gap-8 md:grid-cols-2 xl:grid-cols-5">
-          <section>
-            <h3 class="text-2xl font-bold text-slate-900 dark:text-slate-100">{{ footer.supportTitle }}</h3>
-            <ul class="mt-4 space-y-3 text-base text-slate-700 dark:text-slate-300">
+        <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-700 dark:bg-slate-900">
+          <div class="grid gap-6 md:grid-cols-[1.2fr_0.9fr_1fr] md:items-start">
+            <section>
+            <h3 class="text-xl font-extrabold text-slate-900 dark:text-slate-100">{{ footer.supportTitle }}</h3>
+            <ul class="mt-4 space-y-2 text-base text-slate-700 dark:text-slate-300">
               <li>{{ footer.supportShortNumber }}</li>
               <li>{{ footer.supportPhone }}</li>
               <li>{{ footer.supportEmail }}</li>
             </ul>
-          </section>
+            </section>
 
-          <section>
-            <h3 class="text-2xl font-bold text-slate-900 dark:text-slate-100">{{ footer.infoTitle }}</h3>
-            <ul class="mt-4 space-y-2 text-base text-slate-700 dark:text-slate-300">
-              <li v-for="item in footer.infoLinks" :key="`info-${item}`">{{ item }}</li>
-            </ul>
-          </section>
+            <section>
+            <div class="grid gap-1.5">
+              <article
+                v-for="item in currencyCards"
+                :key="item.code"
+                class="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 dark:border-slate-700 dark:bg-slate-800"
+              >
+                <p class="text-sm font-bold text-slate-700 dark:text-slate-200">{{ item.flag }} {{ item.code }}</p>
+                <p class="text-sm font-extrabold text-slate-900 dark:text-slate-100">{{ item.value }}</p>
+              </article>
+            </div>
+            </section>
 
-          <section>
-            <h3 class="text-2xl font-bold text-slate-900 dark:text-slate-100">{{ footer.mediaTitle }}</h3>
-            <ul class="mt-4 space-y-2 text-base text-slate-700 dark:text-slate-300">
-              <li v-for="item in footer.mediaLinks" :key="`media-${item}`">{{ item }}</li>
-            </ul>
-          </section>
-
-          <section>
-            <h3 class="text-2xl font-bold text-slate-900 dark:text-slate-100">{{ footer.partnersTitle }}</h3>
-            <ul class="mt-4 space-y-2 text-base text-slate-700 dark:text-slate-300">
-              <li v-for="item in footer.partnersLinks" :key="`partners-${item}`">{{ item }}</li>
-            </ul>
-          </section>
-
-          <section>
-            <h3 class="text-2xl font-bold text-slate-900 dark:text-slate-100">{{ footer.socialsTitle }}</h3>
-            <div class="mt-4 flex flex-wrap gap-3">
+            <section>
+            <h3 class="text-xl font-extrabold text-slate-900 dark:text-slate-100">{{ footer.socialsTitle }}</h3>
+            <div class="mt-4 flex flex-wrap gap-2">
               <a
                 v-for="social in footer.socials"
                 :key="social.id"
@@ -58,8 +51,9 @@
                 </svg>
               </a>
             </div>
-          </section>
-        </div>
+            </section>
+          </div>
+        </section>
       </div>
 
       <div class="border-t border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-950">
@@ -68,6 +62,42 @@
         </div>
       </div>
     </footer>
+
+    <div v-if="!isAdminRoute" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2">
+      <button class="rounded-xl bg-brand-dark px-4 py-2 text-sm font-bold text-white shadow-soft" @click="openCallPopup = true">Заказать звонок</button>
+      <a href="https://t.me/omma_tour_support_bot" target="_blank" rel="noopener noreferrer" class="rounded-xl bg-cyan-600 px-4 py-2 text-center text-sm font-bold text-white shadow-soft">
+        Онлайн-чат
+      </a>
+    </div>
+
+    <div v-if="openCallPopup" class="fixed inset-0 z-[90] grid place-items-center bg-slate-900/55 p-4">
+      <div class="w-full max-w-md rounded-2xl bg-white p-5 shadow-soft dark:bg-slate-900">
+        <div class="mb-3 flex items-center justify-between">
+          <h3 class="text-xl font-bold">Заказать звонок</h3>
+          <button class="text-xl" @click="openCallPopup = false">×</button>
+        </div>
+        <form class="space-y-3" @submit.prevent="submitCallRequest">
+          <input v-model="callForm.name" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" placeholder="Ваше имя">
+          <input v-model="callForm.phone" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" placeholder="+998 ...">
+          <button class="w-full rounded-xl bg-brand-dark px-4 py-2 text-sm font-bold text-white">Отправить</button>
+        </form>
+        <p class="mt-2 text-sm font-semibold text-cyan-700">{{ callStatus }}</p>
+      </div>
+    </div>
+
+    <div v-if="openSpecialPopup" class="fixed inset-0 z-[90] grid place-items-center bg-slate-900/55 p-4">
+      <div class="w-full max-w-lg rounded-2xl bg-white p-6 shadow-soft dark:bg-slate-900">
+        <div class="mb-3 flex items-center justify-between">
+          <h3 class="text-2xl font-bold">Спецпредложение недели</h3>
+          <button class="text-xl" @click="openSpecialPopup = false">×</button>
+        </div>
+        <p class="text-sm text-slate-600 dark:text-slate-300">Скидка 12% на направления Дубай, Бали и Мальдивы при бронировании до воскресенья.</p>
+        <div class="mt-4 flex gap-2">
+          <NuxtLink to="/tours?restType=горящий" class="rounded-xl bg-brand px-4 py-2 text-sm font-bold text-white" @click="openSpecialPopup = false">Смотреть туры</NuxtLink>
+          <button class="rounded-xl border border-slate-300 px-4 py-2 text-sm font-bold text-slate-700" @click="openSpecialPopup = false">Позже</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -76,6 +106,17 @@ import type { FooterSettings } from '~/types/tour'
 
 const route = useRoute()
 const isAdminRoute = computed(() => route.path.startsWith('/admin'))
+const openCallPopup = ref(false)
+const openSpecialPopup = ref(false)
+const callForm = reactive({ name: '', phone: '' })
+const callStatus = ref('')
+type CurrencyCard = { code: string; value: string; flag: string }
+
+const currencyCards = ref<CurrencyCard[]>([
+  { code: 'USD', value: '1.0000', flag: '🇺🇸' },
+  { code: 'EUR', value: '0.9200', flag: '🇪🇺' },
+  { code: 'UZS', value: '12 600', flag: '🇺🇿' }
+])
 
 const fallbackFooter: FooterSettings = {
   supportTitle: 'Контакты и служба поддержки',
@@ -123,4 +164,62 @@ const socialIconPath = (social: FooterSettings['socials'][number]): string => {
 
   return instagram
 }
+
+const submitCallRequest = async (): Promise<void> => {
+  if (!callForm.name || !callForm.phone) {
+    callStatus.value = 'Заполните имя и телефон.'
+    return
+  }
+  try {
+    await $fetch('/api/contact', {
+      method: 'POST',
+      body: { name: callForm.name, phone: callForm.phone, destination: 'Заказать звонок (popup)' }
+    })
+    callStatus.value = 'Заявка отправлена.'
+    callForm.name = ''
+    callForm.phone = ''
+  } catch {
+    callStatus.value = 'Ошибка отправки.'
+  }
+}
+
+const loadCurrencyRates = async (): Promise<void> => {
+  try {
+    const response = await $fetch<{
+      base: string
+      rates: { UZS: number; EUR: number; RUB: number; TRY: number; AED: number; GBP: number; JPY: number; CNY: number }
+    }>('/api/currency')
+    currencyCards.value = [
+      { code: 'USD', value: '1.0000', flag: '🇺🇸' },
+      { code: 'EUR', value: response.rates.EUR.toFixed(4), flag: '🇪🇺' },
+      { code: 'UZS', value: new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 0 }).format(response.rates.UZS), flag: '🇺🇿' }
+    ]
+  } catch {
+    currencyCards.value = [
+      { code: 'USD', value: '1.0000', flag: '🇺🇸' },
+      { code: 'EUR', value: '0.9200', flag: '🇪🇺' },
+      { code: 'UZS', value: '12 600', flag: '🇺🇿' }
+    ]
+  }
+}
+
+let currencyInterval: ReturnType<typeof setInterval> | null = null
+
+onMounted(async () => {
+  setTimeout(() => {
+    openSpecialPopup.value = true
+  }, 3000)
+
+  await loadCurrencyRates()
+  currencyInterval = setInterval(() => {
+    void loadCurrencyRates()
+  }, 30000)
+})
+
+onBeforeUnmount(() => {
+  if (currencyInterval) {
+    clearInterval(currencyInterval)
+    currencyInterval = null
+  }
+})
 </script>

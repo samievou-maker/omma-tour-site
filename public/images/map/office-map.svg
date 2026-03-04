@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="420" viewBox="0 0 1200 420">
+  <rect width="1200" height="420" fill="#e2e8f0"/>
+  <path d="M0 90 H1200 M0 180 H1200 M0 270 H1200 M0 360 H1200" stroke="#cbd5e1" stroke-width="2"/>
+  <path d="M120 0 V420 M300 0 V420 M480 0 V420 M660 0 V420 M840 0 V420 M1020 0 V420" stroke="#cbd5e1" stroke-width="2"/>
+  <path d="M140 220 C300 160 430 290 610 220 C760 160 930 260 1120 190" stroke="#38bdf8" stroke-width="10" fill="none" opacity="0.75"/>
+  <circle cx="690" cy="210" r="18" fill="#ef4444"/>
+  <circle cx="690" cy="210" r="38" fill="#ef4444" opacity="0.2"/>
+  <text x="720" y="214" fill="#0f172a" font-size="28" font-family="Arial, sans-serif" font-weight="700">OMMA office • Tashkent</text>
+</svg>

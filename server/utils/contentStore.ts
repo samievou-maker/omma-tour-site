@@ -148,10 +148,110 @@ const cloneTours = (): TourPackage[] =>
     departures: tour.departures.map((departure) => ({ ...departure }))
   }))
 
+const makeStableImage = (seed: string, width = 1600, height = 900): string =>
+  `https://picsum.photos/seed/${encodeURIComponent(seed)}/${width}/${height}`
+
+const normalizeImageUrl = (raw: string, seed: string, width = 1600, height = 900): string => {
+  const value = String(raw ?? '').trim()
+  if (value.length === 0 || value.includes('unsplash.com') || value.includes('wikimedia.org') || value.includes('staticmap')) {
+    return makeStableImage(seed, width, height)
+  }
+  return value
+}
+
+const buildExtraTours = (): TourPackage[] => {
+  const templates = cloneTours()
+  const baseTemplate = templates[0]
+  if (!baseTemplate) {
+    return []
+  }
+  const cities: Array<[string, string, string, string]> = [
+    ['italy-rome-art', 'Италия Classic', 'Италия', 'Рим'],
+    ['spain-barcelona-sun', 'Испания Barcelona Sun', 'Испания', 'Барселона'],
+    ['france-paris-signature', 'Франция Paris Signature', 'Франция', 'Париж'],
+    ['thailand-phuket-sea', 'Таиланд Phuket Sea', 'Таиланд', 'Пхукет'],
+    ['vietnam-da-nang', 'Вьетнам Danang Escape', 'Вьетнам', 'Дананг'],
+    ['malaysia-kuala-vibes', 'Малайзия Kuala Vibes', 'Малайзия', 'Куала-Лумпур'],
+    ['sri-lanka-cinnamon', 'Шри-Ланка Cinnamon Coast', 'Шри-Ланка', 'Коломбо'],
+    ['japan-tokyo-zen', 'Япония Tokyo Zen', 'Япония', 'Токио'],
+    ['korea-seoul-city', 'Корея Seoul City', 'Южная Корея', 'Сеул'],
+    ['azerbaijan-baku-lights', 'Азербайджан Baku Lights', 'Азербайджан', 'Баку'],
+    ['kazakhstan-almaty-view', 'Казахстан Almaty View', 'Казахстан', 'Алматы'],
+    ['kyrgyzstan-issyk', 'Кыргызстан Issyk Weekend', 'Кыргызстан', 'Иссык-Куль'],
+    ['montenegro-adriatic', 'Черногория Adriatic', 'Черногория', 'Будва'],
+    ['croatia-dubrovnik', 'Хорватия Dubrovnik', 'Хорватия', 'Дубровник'],
+    ['greece-santorini', 'Греция Santorini Blue', 'Греция', 'Санторини'],
+    ['cyprus-larnaca', 'Кипр Larnaca Beach', 'Кипр', 'Ларнака'],
+    ['uae-abu-dhabi', 'ОАЭ Abu Dhabi Select', 'ОАЭ', 'Абу-Даби'],
+    ['qatar-doha-weekend', 'Катар Doha Weekend', 'Катар', 'Доха'],
+    ['india-goa-escape', 'Индия Goa Escape', 'Индия', 'Гоа'],
+    ['indonesia-lombok', 'Индонезия Lombok', 'Индонезия', 'Ломбок'],
+    ['turkiye-cappadocia-air', 'Турция Cappadocia Air', 'Турция', 'Каппадокия'],
+    ['uk-london-express', 'Лондон Express', 'Великобритания', 'Лондон'],
+    ['germany-berlin-city', 'Германия Berlin City', 'Германия', 'Берлин'],
+    ['austria-vienna-opera', 'Австрия Vienna Opera', 'Австрия', 'Вена']
+  ]
+
+  return cities.map(([id, title, country, city], index) => {
+    const template = templates[index % templates.length] ?? baseTemplate
+    const offset = index + 1
+    const departures = template.departures.map((departure, depIndex) => ({
+      ...departure,
+      date: `2026-${String(((offset + depIndex) % 12) + 1).padStart(2, '0')}-${String(((offset * 3 + depIndex * 5) % 26) + 1).padStart(2, '0')}`,
+      priceFromUsd: Math.max(420, template.priceFromUsd + offset * 12 + depIndex * 8)
+    }))
+
+    return {
+      id,
+      title,
+      description: template.description,
+      shortDescription: template.shortDescription,
+      features: [...template.features],
+      included: [...template.included],
+      notIncluded: [...template.notIncluded],
+      itinerary: [...template.itinerary],
+      country,
+      city,
+      badge: offset % 4 === 0 ? 'Горящий' : template.badge,
+      heroImage: makeStableImage(`${id}-hero`),
+      gallery: [
+        makeStableImage(`${id}-gallery-1`, 1200, 800),
+        makeStableImage(`${id}-gallery-2`, 1200, 800),
+        makeStableImage(`${id}-gallery-3`, 1200, 800)
+      ],
+      durationNights: template.durationNights,
+      hotelClass: template.hotelClass,
+      availableFrom: template.availableFrom,
+      availableTo: template.availableTo,
+      departures,
+      priceFromUsd: departures[0]?.priceFromUsd ?? template.priceFromUsd,
+      importantNotes: template.importantNotes ? [...template.importantNotes] : [],
+      faq: template.faq ? [...template.faq] : []
+    }
+  })
+}
+
+const ensureMinimumTours = (currentTours: TourPackage[]): TourPackage[] => {
+  const unique = new Map<string, TourPackage>()
+  currentTours.forEach((tour) => unique.set(tour.id, tour))
+
+  const seedTours = [...cloneTours(), ...buildExtraTours()]
+  for (const tour of seedTours) {
+    if (unique.size >= 30) {
+      break
+    }
+    if (!unique.has(tour.id)) {
+      unique.set(tour.id, tour)
+    }
+  }
+
+  return [...unique.values()]
+}
+
 const defaultContent = (): SiteContent => ({
   settings: defaultSettings(),
   footer: defaultFooter(),
-  tours: cloneTours(),
+  tours: ensureMinimumTours(cloneTours()),
   news: defaultNews(),
   destinations: defaultDestinations(),
   reviews: defaultReviews(),
@@ -169,6 +269,14 @@ const normalizeStringArray = (items: unknown): string[] => {
 
 const sanitizeTour = (rawTour: Partial<TourPackage>): TourPackage => {
   const id = String(rawTour.id ?? '').trim().toLowerCase().replace(/[^a-z0-9-]/g, '-') || `tour-${Date.now()}`
+  const rawGallery = normalizeStringArray(rawTour.gallery)
+  const gallery = rawGallery.length > 0
+    ? rawGallery.map((item, index) => normalizeImageUrl(item, `${id}-gallery-${index + 1}`, 1200, 800))
+    : [
+        makeStableImage(`${id}-gallery-1`, 1200, 800),
+        makeStableImage(`${id}-gallery-2`, 1200, 800),
+        makeStableImage(`${id}-gallery-3`, 1200, 800)
+      ]
 
   return {
     id,
@@ -182,8 +290,8 @@ const sanitizeTour = (rawTour: Partial<TourPackage>): TourPackage => {
     included: normalizeStringArray(rawTour.included),
     notIncluded: normalizeStringArray(rawTour.notIncluded),
     itinerary: normalizeStringArray(rawTour.itinerary),
-    heroImage: String(rawTour.heroImage ?? '').trim(),
-    gallery: normalizeStringArray(rawTour.gallery),
+    heroImage: normalizeImageUrl(String(rawTour.heroImage ?? '').trim(), `${id}-hero`),
+    gallery,
     durationNights: Math.max(1, Number(rawTour.durationNights ?? 1)),
     hotelClass: String(rawTour.hotelClass ?? '').trim(),
     availableFrom: String(rawTour.availableFrom ?? '').trim(),
@@ -307,7 +415,7 @@ export const readContent = async (): Promise<SiteContent> => {
   return {
     settings: sanitizeSettings(parsed.settings),
     footer: sanitizeFooter(parsed.footer),
-    tours: Array.isArray(parsed.tours) ? parsed.tours.map((tour) => sanitizeTour(tour)) : cloneTours(),
+    tours: ensureMinimumTours(Array.isArray(parsed.tours) ? parsed.tours.map((tour) => sanitizeTour(tour)) : cloneTours()),
     news: Array.isArray(parsed.news) ? parsed.news.map((item) => sanitizeNews(item)) : defaultNews(),
     destinations: Array.isArray(parsed.destinations)
       ? parsed.destinations.map((item) => sanitizeDestination(item))
@@ -341,7 +449,7 @@ export const writeContent = async (content: SiteContent): Promise<SiteContent> =
   const normalized: SiteContent = {
     settings: sanitizeSettings(content.settings),
     footer: sanitizeFooter(content.footer),
-    tours: [...uniqueTourMap.values()],
+    tours: ensureMinimumTours([...uniqueTourMap.values()]),
     news: [...uniqueNewsMap.values()],
     destinations: [...uniqueDestinationsMap.values()],
     reviews: [...uniqueReviewsMap.values()],

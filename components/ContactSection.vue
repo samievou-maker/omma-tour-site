@@ -8,9 +8,35 @@
           {{ t('contactSubtitle') }}
         </p>
         <div class="mt-4 space-y-1 font-semibold">
-          <p>{{ settings.contactPhone }}</p>
-          <p>{{ settings.contactEmail }}</p>
+          <p><a :href="`tel:${settings.contactPhone.replace(/\\s+/g, '')}`" class="hover:text-cyan-200">{{ settings.contactPhone }}</a></p>
+          <p><a :href="`mailto:${settings.contactEmail}`" class="hover:text-cyan-200">{{ settings.contactEmail }}</a></p>
           <p class="text-cyan-200">{{ settings.contactAddress }}</p>
+        </div>
+        <div class="mt-4 flex flex-wrap gap-2">
+          <a
+            href="https://t.me/omma_tour_support_bot"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="rounded-xl bg-white/20 px-3 py-2 text-xs font-bold"
+          >
+            Telegram
+          </a>
+          <a
+            href="https://wa.me/998901234567"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="rounded-xl bg-white/20 px-3 py-2 text-xs font-bold"
+          >
+            WhatsApp
+          </a>
+          <a
+            href="https://t.me/omma_tour_support_bot"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="rounded-xl border border-white/40 px-3 py-2 text-xs font-bold"
+          >
+            Онлайн-чат (Telegram Bot)
+          </a>
         </div>
       </div>
 
@@ -65,6 +91,27 @@
         <p class="mt-3 min-h-5 text-sm font-semibold text-cyan-100" aria-live="polite">{{ statusMessage }}</p>
       </form>
     </div>
+
+    <div class="mx-auto mt-6 w-[min(1160px,92%)] overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-soft">
+      <iframe
+        :src="officeMapEmbedUrl"
+        title="Карта офиса OMMA tour"
+        class="h-80 w-full border-0"
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade"
+        allowfullscreen
+      />
+      <div class="border-t border-slate-200 px-4 py-3">
+        <a
+          :href="officeMapOpenUrl"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex rounded-xl border border-slate-300 px-4 py-2 text-sm font-bold text-slate-700 hover:border-brand hover:text-brand"
+        >
+          Открыть карту офиса
+        </a>
+      </div>
+    </div>
   </section>
 </template>
 
@@ -89,4 +136,15 @@ const fallbackSettings: SiteSettings = {
 
 const { data } = await useSiteContent()
 const settings = computed(() => data.value?.settings ?? fallbackSettings)
+const config = useRuntimeConfig()
+const googleMapsApiKey = String(config.public.googleMapsApiKey ?? '').trim()
+
+const officeCoords = { lat: 41.3111, lng: 69.2797 } // Ташкент
+const officeQuery = `${officeCoords.lat},${officeCoords.lng}`
+const officeMapOpenUrl = computed(() => `https://www.google.com/maps?q=${officeQuery}`)
+const officeMapEmbedUrl = computed(() =>
+  googleMapsApiKey
+    ? `https://www.google.com/maps/embed/v1/place?key=${encodeURIComponent(googleMapsApiKey)}&q=${encodeURIComponent(officeQuery)}&zoom=14`
+    : `https://www.google.com/maps?q=${encodeURIComponent(officeQuery)}&z=14&output=embed`
+)
 </script>
